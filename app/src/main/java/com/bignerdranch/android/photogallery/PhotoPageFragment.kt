@@ -1,6 +1,7 @@
 package com.bignerdranch.android.photogallery
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,10 +9,13 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.bignerdranch.android.photogallery.databinding.FragmentPhotoPageBinding
+import kotlinx.android.synthetic.main.fragment_photo_page.web_view
+
 
 class PhotoPageFragment : Fragment() {
     private val args: PhotoPageFragmentArgs by navArgs()
@@ -46,6 +50,7 @@ class PhotoPageFragment : Fragment() {
                             progressBar.progress = newProgress
                         }
                     }
+
                     override fun onReceivedTitle(
                         view: WebView?,
                         title: String?
@@ -57,5 +62,25 @@ class PhotoPageFragment : Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val callback = object : OnBackPressedCallback(
+            true // default to enabled
+        ) {
+            override fun handleOnBackPressed() {
+                if (web_view.canGoBack()) {
+                    web_view.goBack()
+                } else {
+                    isEnabled = false
+                    activity?.onBackPressed()
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(
+            this, // LifecycleOwner
+            callback
+        )
     }
 }
