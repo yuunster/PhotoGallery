@@ -39,10 +39,22 @@ class PhotoGalleryViewModel : ViewModel() {
                 }
             }
         }
+
+        viewModelScope.launch {
+            preferencesRepository.isPolling.collect { isPolling ->
+                _uiState.update { it.copy(isPolling = isPolling) }
+            }
+        }
     }
 
     fun setQuery(query: String) {
         viewModelScope.launch { preferencesRepository.setStoredQuery(query) }
+    }
+
+    fun toggleIsPolling() {
+        viewModelScope.launch {
+            preferencesRepository.setPolling(!uiState.value.isPolling)
+        }
     }
     private suspend fun fetchGalleryItems(query: String): List<GalleryItem> {
         return if (query.isNotEmpty()) {
@@ -55,5 +67,6 @@ class PhotoGalleryViewModel : ViewModel() {
 
 data class PhotoGalleryUiState(
     val images: List<GalleryItem> = listOf(),
-    val query: String = ""
+    val query: String = "",
+    val isPolling: Boolean = false,
 )
